@@ -8,13 +8,14 @@ e.g. for a motor write via BLED112
 3d 00	att handle = 61
 04	4 bytes follow
 01	channel 01 or 02
+01  ??
 01	format is byte
 a9	speed/direction
 
 Therefeore the actual BLE write is
 
 UUID	000015651212efde1523785feabcd123
-DATA	04 01 01 a9 
+DATA	04 01 01 01 a9 
 
 
 
@@ -219,7 +220,7 @@ Reply 00 03 04 06 00 00 00
 3d 00	att handle = 61
 04	4 bytes follow
 01	channel 01 or 02
-01
+01  ??
 01	format is byte
 a9	speed/direction
 
@@ -279,7 +280,7 @@ Reply 00 03 04 06 00 00 00
 00 0a 04 06
 00 	connection handle
 3d 00	att handle = 61
-04	4 bytes follow
+06	6 bytes follow
 06	channel 6
 04	??
 03	3 bytes follow
