@@ -17,6 +17,35 @@ Therefeore the actual BLE write is
 UUID	000015651212efde1523785feabcd123
 DATA	04 01 01 01 a9 
 
+****************
+****************
+****************
+UUIDS
+****************
+****************
+****************
+
+
+Service 12	00001523 1212 efde 1523 785feabcd123
+
+11 00	17	00001526 1212 efde 1523 785feabcd123	Button Char
+15 00	21	00001527 1212 efde 1523 785feabcd123	Port Type Char
+19 00	25	00001528 1212 efde 1523 785feabcd123	Low Voltage alert
+1D 00	29	00001529 1212 efde 1523 785feabcd123	High Current alert  
+21 00	33	0000152a 1212 efde 1523 785feabcd123	Low Signal alert
+25 00	37	0000152b 1212 efde 1523 785feabcd123	Turn off device  
+28 00	40	0000152c 1212 efde 1523 785feabcd123	Vcc port control      
+2B 00	43	0000152d 1212 efde 1523 785feabcd123	Battery type Indicator  
+2E 00	46	0000152e 1212 efde 1523 785feabcd123	Disconnect Char         
+
+Service 48 	00004f0e 1212 efde 1523 785feabcd123
+
+32 00	50	00001560 1212 efde 1523 785feabcd123	Sensor Value        
+36 00	54	00001561 1212 efde 1523 785feabcd123	Value format 	
+3a 00	58	00001563 1212 efde 1523 785feabcd123	Input Command
+3d 00	61	00001565 1212 efde 1523 785feabcd123	Output Command
+
+
 
 
 ****************
