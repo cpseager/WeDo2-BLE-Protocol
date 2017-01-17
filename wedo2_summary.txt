@@ -1,6 +1,6 @@
 WeDo2 summary, using BLED112 dongle.
 
-The packet structure for BLED112 writes has extra header bytes at start, so if not using BLED112 simply remove the first few bytes.
+The packet structure for BLED112 writes has extra header bytes at start, so if not using BLED112 simply remove the first few bytes (up to the att handle).
 
 e.g. for a motor write via BLED112
 00 08 04 06
@@ -14,6 +14,7 @@ a9	speed/direction
 
 Therefeore the actual BLE write is
 
+HANDLE	61
 UUID	000015651212efde1523785feabcd123
 DATA	04 01 01 01 a9 
 
