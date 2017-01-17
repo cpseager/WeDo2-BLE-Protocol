@@ -1,0 +1,633 @@
+WeDo2 summary, using BLED112 dongle.
+
+The packet structure for BLED112 writes has extra header bytes at start, so if not using BLED112 simply remove the first few bytes.
+
+e.g. for a motor write via BLED112
+00 08 04 06
+00 	connection handle
+3d 00	att handle = 61
+04	4 bytes follow
+01	channel 01 or 02
+01	format is byte
+a9	speed/direction
+
+Therefeore the actual BLE write is
+
+UUID	000015651212efde1523785feabcd123
+DATA	04 01 01 a9 
+
+
+
+****************
+****************
+****************
+Reset the BLED112 USB Dongle
+LEGO Does this, is it really necessary?
+
+****************
+****************
+****************
+
+Open COM Port at baud 28800, N, 8, 1
+Reset the USB Dongle
+Send 	00 01 00 00 00
+Reply	None
+Wait a while
+
+
+
+****************
+****************
+****************
+
+Open COM Port
+
+****************
+****************
+****************
+
+Open COM Port at baud 28800, N, 8, 1
+
+
+
+
+****************
+****************
+****************
+Start BLED122 Scanning
+
+****************
+****************
+****************
+
+Send  00 01 06 02 01 
+Reply 00 02 06 02 00 00
+
+
+
+
+
+****************
+****************
+****************
+Advertising events will then arrive from weDo if advertising.
+Note there may be other non-WeDo stuff available too!
+
+****************
+****************
+****************
+
+
+Advertising Data is in two separate parts
+
+Part 1 - Connectable Advert
+
+80 2a 06 00 c2 00 e6 d8 1b f8 e6 a0 00 ff 1f 02   €*..Â.æØ.øæ .ÿ.. 
+01 06 11 06 23 d1 bc ea 5f 78 23 15 de ef 12 12   ....#Ñ¼ê_x#.Þï.. 
+23 15 00 00 09 16 23 15 00 00 00 00 00 00         #.....#.......   
+
+
+
+80 
+2a 
+06 	GAP 
+00	msg id
+C2 	RSSi	 
+00	connectable advert
+e6 d8 1b f8 e6 a0  	public IP in reverse
+00	public
+ff	bond handle
+1f
+02 	2 bytes follow
+01 	Type 01
+06 	06 GENERAL_DISC_MODE EDR_NOT_SUPPORTED
+11 	17 bytes follow
+06 	Type 06 Incomplete list of service ids
+23 d1 bc ea 5f 78 23 15 de ef 12 12 23 15 00 00 = UUID of service 3, handle 12
+09 	length 09
+16 	Type 16 Service Data - 16-bit UUID 
+23 15 	UUID
+00 00   ??padding
+
+
+
+Part 2 - Scan Response Packet 
+
+Note the WeDo name can be end user altered so is not a reliable check
+
+80 2a 06 00 c2 04 e6 d8 1b f8 e6 a0 00 ff 1f 05   €*..Â.æØ.øæ .ÿ.. 
+12 10 00 20 00 02 0a 00 15 09 4c 50 46 32 20 53   ... ......LPF2 S 
+6d 61 72 74 20 48 75 62 20 32 20 49 2f 4f         mart Hub 2 I/O   
+
+
+80 
+2a 
+06 	GAP 
+00	msg id
+C2 	RSSi	 
+04	scan response packet
+e6 d8 1b f8 e6 a0  	public IP in reverse
+00	public
+ff	bond handle
+1f 
+05 	5 bytes follow
+12 	Type 12 Slave Connection Interval Range
+10 00 20 00
+02		2 bytes follow
+0a 		type 0A tx power level
+00 		00
+15 	        21 bytes follow
+09 		complete local name follows
+"LPF2 Smart Hub 2 I/O" = name
+
+
+
+
+***************
+***************
+***************
+Use End Procedure to stop scanning
+(page 94) 
+                             
+***************
+***************
+***************
+
+Send  00 00 06 04 
+Reply 00 02 06 04 00 00
+
+
+
+
+***************
+***************
+***************
+Connect to found WeDo by Mac address
+***************
+***************
+***************
+
+Send  00 10 06 03 e6 d8 1b f8 e6 a0 00 06 00 0e 00 2c01 00 00 00      
+Reply 00 03 06 03 00 00 00   
+
+00 10 06 03
+e6 d8 1b f8 e6 a0	mac address in reverse
+00 			public
+06 00			conn_interval_min
+0e 00			conn_interval_max
+2c 01			supervision timeout
+00 00 			latency disabled
+00			??  
+
+
+***************
+***************
+***************
+
+
+
+***************
+***************
+***************
+Writing to outputs	'Output Command'
+
+***************
+***************
+***************
+
+
+There are 6 channels, only 4 used:
+channel 1	external connector 01=motor 22=tilt 23=motion 24=generic
+channel 2	external connector 01=motor 22=tilt 23=motion 24=generic
+channel 3	device type 15 current
+channel 4	device type 14 voltage
+channel 5	device type 16 piezo
+channel 6	device type 17 RGB
+
+
+Write to output
+UUID 		0000 1565 1212efde1523785feabcd123
+Handle		61 (3d 00)
+
+
+>motor
+Send  00 08 04 06 00 3d 00 04 01 01 01 a9 
+Reply 00 03 04 06 00 00 00
+
+00 08 04 06
+00 	connection handle
+3d 00	att handle = 61
+04	4 bytes follow
+01	channel 01 or 02
+01
+01	format is byte
+a9	speed/direction
+
+
+Bit 7 of speed selects the direction.
+
+Example Motor speeds are:
+speed 1 	= a9 = 10101001
+other way speed	= 2a = 00101010
+off		= 7f = 01111111
+
+Lego software uses 10 speeds 0 to 9
+00 = 00000000
+2a = 00101010
+30 = 00110000
+36 = 00111010
+3d = 00111101
+44 = 01000100
+4a = 01001010
+50 = 01010000
+5e = 01011110
+7f = 01111111 (off)
+
+> piezo
+Send  00 0b 04 06 00 3d 00 07 05 02 04 06 01 f4 01
+Reply 00 03 04 06 00 00 00
+
+00 0b 04 06
+00 	connection handle
+3d 00	att handle = 61
+07	7 bytes follow
+05	channel 05
+02	??
+04	4 bytes follow
+06 01	= 262 =  freq (e.g. 262=middle C)
+f4 01	= 500 = duration in ms
+
+
+> RGB_LED by index
+Send  00 08 04 06 00 3d 00 04 06 04 01 04
+Reply 00 03 04 06 00 00 00
+
+00 08 04 06
+00 	connection handle
+3d 00	att handle = 61
+04	4 bytes follow
+06	channel 6
+04	??
+01	1 bytes follows
+04	Predefined lego colours (10 off, 01-09 with 00=off)
+
+
+> RGB_LED by RGB (must change mode to absolute before using this)
+Send  00 0a 04 06 00 3d 00 06 06 04 03 00 ff 40
+Reply 00 03 04 06 00 00 00
+
+00 0a 04 06
+00 	connection handle
+3d 00	att handle = 61
+04	4 bytes follow
+06	channel 6
+04	??
+03	3 bytes follow
+00	red
+ff	green
+40	blue
+
+
+***************
+***************
+***************
+Changing Modes - 'Input Command'
+
+***************
+***************
+***************
+
+
+Changing mode of i/o device
+UUID 		0000 1563 1212efde1523785feabcd123
+Handle		58 (3a 00)
+
+
+> RGB set mode to discrete / absolute
+Send  00 0f 04 06 00 3a 00 0b 01 02 06 17 00 01 00 00 00 00 01    
+Reply 00 03 04 06 00 00 00
+
+00 0f 04 06
+00 	connection handle
+3a 00	att handle = 
+0b	0b bytes follow
+01	??
+02	??
+06	channel 6
+17 	17 = RGB device
+01	00=absolute 01=discrete
+01 01 00 00 00 00 00 01	?Unknown
+
+
+> write tilt sensor mode
+Send  00 0f 04 06 00 3a 00 0b 01 02 01 22 01 01 00 00 00 02 01    
+Reply 00 03 04 06 00 00 00
+
+00 0f 04 06
+00 	connection handle
+3a 00	att handle = 
+0b	0b bytes follow
+01	??
+02	??
+01	channel 01 or 02
+22 	22 = tilt sensor device
+01	00 or 01 new mode
+00 00 00 02 01	?Unknown
+
+*****************************
+
+Motion Detect
+00 0f 04 06 00 3a 00 0b 01 02 01/02 23 00 01 00 00 00 02 01        
+Motion Count
+00 0f 04 06 00 3a 00 0b 01 02 01/02 23 01 01 00 00 00 02 01     
+Tilt Tilt
+00 0f 04 06 00 3a 00 0b 01 02 01/02 22 01 01 00 00 00 02 01
+Tilt Angle
+00 0f 04 06 00 3a 00 0b 01 02 01/02 22 00 01 00 00 00 02 01
+RGB Absolute
+00 0f 04 06 00 3a 00 0b 01 02 06    17 00 01 00 00 00 00 01   
+RGB Discrete
+00 0f 04 06 00 3a 00 0b 01 02 06    17 01 01 00 00 00 00 01  
+
+
+Start sensor working 
+00 07 04 06 00 3a 00 03 00 01 01/02	any sensor attachment
+00 07 04 06 00 3a 00 03 00 01 03	starts voltage, current and RGB aswell	
+00 07 04 06 00 3a 00 03 00 01 04
+00 07 04 06 00 3a 00 03 00 01 06
+
+
+***************
+***************
+***************
+Write new name
+
+***************
+***************
+***************
+
+> Write new name to WeDo
+UUID 		0000 1524 1212efde1523785feabcd123
+Handle		14 (0e 00)
+
+Send  00 14 04 05 00 0e 00 10 4c 50 46 32 20 53 6d 61 72 74 20 48 75 62 20 34 
+
+00 14 04 05
+00 	connection handle
+0e 00	att handle = 14
+10	16 bytes follow
+4c 50 46 32 20 53 6d 61 72 74 20 48 75 62 20 34 = name as ASCII string, no null terminator
+
+
+*********
+*********
+*********
+Events may come at any time after notifications enabled 
+
+*********
+*********
+*********
+
+***************
+***************
+***************
+Enable notifications on input/ouput device changes
+To enable notications we need to write 00 01 to the 2902 handle of that characteristic
+
+***************
+***************
+***************
+
+>Enable sensor change notications
+UUID 		0000 1527 1212efde1523785feabcd123
+Handle		21 (15 00)
+Handle of 2902	22 (16 00)
+
+
+Send  00 06 04 05 00 16 00 02 01 00    
+Reply 00 03 04 05 00 00 00		= echo
+Reply 80 05 04 01 00 00 00 16 00	= procedure completed
+
+Then four to six new device events are received - see below for more details on this event 
+Reply 80 11 04 05 00 15 00 01 0c 01 01 00 22 00000010 00000010	channel 01, sensor added 01, event? 00, device 22= tilt
+Reply 80 11 04 05 00 15 00 01 0c 02 01 01 01 01000000 01000000	channel 02, sensor added 01, event? 01, device 01= motor
+Reply 80 11 04 05 00 15 00 01 0c 03 01 33 15 01000000 01000000	channel 03, sensor added 01, event? 33, device 15= current 
+Reply 80 11 04 05 00 15 00 01 0c 04 01 34 14 01000000 01000000	channel 04, sensor added 01, event? 34, device 14= voltage
+Reply 80 11 04 05 00 15 00 01 0c 05 01 35 16 01000000 01000000	channel 05, sensor added 01, event? 35, device 16= piezo
+Reply 80 11 04 05 00 15 00 01 0c 06 01 36 17 01000000 01000000	channel 06, sensor added 01, event? 36, device 17= RGB 
+
+
+
+
+***************
+***************
+***************
+Enable notifications on button change
+
+***************
+***************
+***************
+
+>Enable button change notications
+UUID 		0000 1526 1212efde1523785feabcd123
+Handle		17 (11 00)
+Handle of 2902	22 (12 00)
+
+Send  00 06 04 05 00 12 00 02 01 00    
+Reply 00 03 04 05 00 00 00		= echo
+Reply 80 05 04 01 00 00 00 16 00	= procedure completed
+
+Then one button event - see below for more details on this event 
+Reply 80 06 04 05 00 11 00 01 01 00
+
+
+*********
+*********
+*********
+Various Notification Events
+
+*********
+*********
+*********
+
+
+Button Changed Event
+UUID 		0000 1526 1212efde1523785feabcd123
+Handle		17 (11 00)
+
+80 06 04 05 00 11 00 01 01 01 
+
+
+80 06 04 05
+00 	connection handle	 
+11 00	attribute handle = 17	
+01	attribute type (notify)
+01	1 byte follows
+00/01	off / on
+
+*********
+
+Sensor Value Changed Event
+UUID 		0000 1560 1212efde1523785feabcd123
+Handle		50 (32 00)
+
+
+80 0b 04 05 00 32 00 01 06 03 02 00 00 a0 40
+
+80 0b 04 05
+00 	connection handle	 
+32 00	attribute handle = 50	
+01	attribute type (notify)
+06	6 byte follows
+03 	?? Unit 00=Raw 01=Percent 02=SI 03=Unknown
+02	channel 01, channel 02, current 03, voltage 04 
+00 00 a0 40	float value
+
+*********
+
+Sensor Type Changed Event
+
+UUID 		0000 1527 1212efde1523785feabcd123
+Handle		21 (15 00)
+
+>Removal of external device:
+80 07 04 05 00 15 00 01 02 02 00
+
+80 07 04 05
+00 	connection handle	 
+15 00	attribute handle = 21	
+01	attribute type (notify)
+02	2 bytes follow
+02	channel 01, channel 02,
+00	sensor removed
+
+>Insertion of external device:
+80 11 04 05 00 15 00 01 0c 02 01 01 22 00 00 00 10 00 00 00 10   
+
+80 11 04 05
+00 	connection handle	 
+15 00	attribute handle = 21	
+01	attribute type (notify)
+0C	0C bytes follow
+02	channel 01, channel 02,
+01	sensor added
+01	ConnectID?? always 00 for channel 1 and 01 for channel 2, or 33-36 for internal
+22	TypeID, 22=tilt, 23=motion, 24=generic, 01=motor
+00 00 00 10   ?? default settings
+00 00 00 10   ?? current settings
+
+
+01 ConnectID
+22 TypeID
+00 Mode
+00 DeltaInterval
+00 Unit 00=Raw 01=Percent 02=SI 03=Unknown
+10 Notifications Enabled
+
+
+Process when inserted
+
+Event
+80 11 04 05 00 15 00 01 0c 01/02 01 00/01 22 00 00 00 10 00 00 00 10        	tilt
+80 11 04 05 00 15 00 01 0c 01/02 01 00/01 23 00 00 00 10 00 00 00 10  		motion
+80 11 04 05 00 15 00 01 0c 01/02 01 01 00/01 01 00 00 00 01 00 00 00            motor 
+
+Write configure device
+00 0f 04 06 00 3a 00 0b 01 02 01/02 22 01 01 00 00 00 02 01	tilt   22 mode 01         
+00 0f 04 06 00 3a 00 0b 01 02 01/02 00 00 01 00 00 00 02 01  	motion 23 mode 00 (note bug where 00 should be 23)
+
+reply
+00 03 04 06 00 00 00
+
+event 
+80 10 04 05 00 36 00 01 0b 03 01/02 22 01 01 00 00 00 02 01 04          tilt            
+80 10 04 05 00 36 00 01 0b 03 01/02 23 00 01 00 00 00 02 01 04		motion 
+
+write start signal to sensor 
+00 07 04 06 00 3a 00 03 00 01 01/02
+
+reply
+00 03 04 06 00 00 00    
+
+
+write start signal to sensor 
+00 07 04 06 00 3a 00 03 00 01 01/02	any sensor attachment
+00 07 04 06 00 3a 00 03 00 01 03	starts voltage, current and RGB aswell	
+00 07 04 06 00 3a 00 03 00 01 04
+00 07 04 06 00 3a 00 03 00 01 06
+
+       
+
+*********
+*********
+*********
+Disconnect procedure
+
+*********
+*********
+*********
+
+Send  00 01 03 00 00    
+Reply 00 03 03 00 00 00 00
+Reply 80 03 03 04 00 16 02
+
+
+
+*********
+*********
+*********
+Close COM port
+
+*********
+*********
+*********
+
+
+
+
+
+
+
+
+
+
+
+
+
+*********
+*********
+*********
+Other handles that may be useful
+
+*********
+*********
+*********
+
+03	Device name (reprogrammable)	4c50463220536d617274204875622034        LPF2 Smart Hub 4
+05      Appearance			0000
+07      Peripheral Preferred Connection 5000a0000000e803
+65	Firmware Revision String	312e302e30362e30303030			1.0.06.0000
+67	Software Revision String	322e302e30302e30303030			2.0.00.0000
+69	Manufacturer Name String	4c45474f2053797374656d20412f53		LEGO System A/S
+72	Battery Level			64
+
+
+0x2901's - User Characteristic Descriptions
+
+19      427574746f6e2043686172                          Button Char             (read 17)
+23      506f727420547970652043686172             	Port Type Char          (read 21)
+27      4c6f7720566f6c7461676520616c657274              Low Voltage alert       (read 25 = 00)
+31      486967682043757272656e7420616c657274            High Current alert      (read 29 = 00)
+35      4c6f77205369676e616c20616c657274                Low Signal alert        (read 33 = 00)
+38      5475726e206f666620646576696365                  Turn off device         (37 notification only)
+41      56636320706f727420636f6e74726f6c                Vcc port control        (read 40 = 01)
+44      42617474657279207479706520496e64696361746f72    Battery type Indicator  (read 43=00 for AA)
+47      446973636f6e6e6563742043686172                  Disconnect Char         (46 notification only)
+52      53656e736f722056616c7565                        Sensor Value            (50 read nothing at all)
+56      56616c756520666f726d6174                        Value format            (read 54 = 0206170001000000000001)
+59      496e70757420436f6d6d616e64                      Input Command           (no read)
+62      4f757470757420436f6d6d616e64                    Output Command          (no read)
+
+
+
+
